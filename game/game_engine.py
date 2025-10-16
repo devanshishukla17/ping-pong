@@ -12,18 +12,34 @@ class GameEngine:
         self.height = height
         self.paddle_width = 10
         self.paddle_height = 100
+        
+        # --- Sound Loading ---
+        # NOTE: Replace these placeholder paths with your actual .wav file paths
+        try:
+            self.score_sound = pygame.mixer.Sound('path/to/score.wav')
+            paddle_sound = pygame.mixer.Sound('path/to/paddle_hit.wav')
+            wall_sound = pygame.mixer.Sound('path/to/wall_bounce.wav')
+        except pygame.error as e:
+            print(f"Warning: Could not load sound files. Make sure paths are correct. Error: {e}")
+            # Use dummy objects if sounds fail to load to prevent crashes
+            class DummySound:
+                def play(self): pass
+            self.score_sound = DummySound()
+            paddle_sound = DummySound()
+            wall_sound = DummySound()
 
         self.player = Paddle(10, height // 2 - 50, self.paddle_width, self.paddle_height)
         self.ai = Paddle(width - 20, height // 2 - 50, self.paddle_width, self.paddle_height)
-        # Assumes the latest ball.py with robust collision is used
-        self.ball = Ball(width // 2, height // 2, 7, 7, width, height) 
+        
+        # Pass sound objects to the Ball constructor
+        self.ball = Ball(width // 2, height // 2, 7, 7, width, height, paddle_sound, wall_sound) 
 
         self.player_score = 0
         self.ai_score = 0
         self.max_score = 5  # Default target to win
         self.font = pygame.font.SysFont("Arial", 30)
         self.game_over_font = pygame.font.SysFont("Arial", 72, bold=True)
-        self.menu_font = pygame.font.SysFont("Arial", 24) # Font for the replay menu
+        self.menu_font = pygame.font.SysFont("Arial", 24)
         self.game_active = True
         self.winner = None
 
@@ -71,9 +87,11 @@ class GameEngine:
             # Scoring logic
             if self.ball.x <= 0:
                 self.ai_score += 1
+                self.score_sound.play() # Play scoring sound
                 self.ball.reset()
             elif self.ball.x >= self.width:
                 self.player_score += 1
+                self.score_sound.play() # Play scoring sound
                 self.ball.reset()
 
             # AI movement logic

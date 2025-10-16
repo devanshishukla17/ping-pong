@@ -2,7 +2,8 @@ import pygame
 import random
 
 class Ball:
-    def __init__(self, x, y, width, height, screen_width, screen_height):
+    # Updated __init__ to accept sound objects
+    def __init__(self, x, y, width, height, screen_width, screen_height, paddle_sound, wall_sound):
         self.original_x = x
         self.original_y = y
         self.x = x
@@ -13,6 +14,10 @@ class Ball:
         self.screen_height = screen_height
         self.velocity_x = random.choice([-5, 5])
         self.velocity_y = random.choice([-3, 3])
+        
+        # Store sound objects
+        self.paddle_sound = paddle_sound
+        self.wall_sound = wall_sound
 
     def move(self):
         self.x += self.velocity_x
@@ -21,21 +26,29 @@ class Ball:
         # Wall collision (top/bottom)
         if self.y <= 0 or self.y + self.height >= self.screen_height:
             self.velocity_y *= -1
+            self.wall_sound.play() # Play wall bounce sound
 
     def check_collision(self, player, ai):
+        # We check collision only if the ball is moving towards the paddle to prevent sticking/tunneling
         ball_rect = self.rect()
+        hit = False
         
         # Check collision with Player Paddle (moving left, velocity_x < 0)
         if self.velocity_x < 0 and ball_rect.colliderect(player.rect()):
             # Push ball out of the paddle to prevent sticking
             self.x = player.x + player.width 
             self.velocity_x *= -1
+            hit = True
 
         # Check collision with AI Paddle (moving right, velocity_x > 0)
         elif self.velocity_x > 0 and ball_rect.colliderect(ai.rect()):
             # Push ball out of the paddle to prevent sticking
             self.x = ai.x - self.width
             self.velocity_x *= -1
+            hit = True
+            
+        if hit:
+            self.paddle_sound.play() # Play paddle hit sound
 
     def reset(self):
         self.x = self.original_x

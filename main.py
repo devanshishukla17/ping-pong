@@ -4,6 +4,7 @@ from game.game_engine import GameEngine
 
 # Initialize pygame/Start application
 pygame.init()
+pygame.mixer.init() # Initialize the mixer for sound effects
 
 # Screen dimensions
 WIDTH, HEIGHT = 800, 600
@@ -62,4 +63,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
