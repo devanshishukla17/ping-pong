@@ -23,31 +23,38 @@ engine = GameEngine(WIDTH, HEIGHT)
 
 def main():
     running = True
-    game_over_time = 0 # To store the time when the game ended
 
     while running:
-        # Event handling (only checking for quit)
+        # Check if the game is over to enable menu input handling
+        is_game_over = not engine.game_active
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            
+            if is_game_over and event.type == pygame.KEYDOWN:
+                # Handle menu selection input when the game is over
+                if event.key == pygame.K_3:
+                    engine.set_max_score(3)
+                    engine.reset_game()
+                elif event.key == pygame.K_5:
+                    engine.set_max_score(5)
+                    engine.reset_game()
+                elif event.key == pygame.K_7:
+                    engine.set_max_score(7)
+                    engine.reset_game()
+                elif event.key == pygame.K_ESCAPE:
+                    running = False
 
-        # Game Logic
+
+        # Game Logic (only runs if engine.game_active is True, handled internally by engine.update())
         engine.handle_input()
         engine.update()
         
         # Rendering
         SCREEN.fill(BLACK)
         engine.render(SCREEN)
-
-        # Game Over Handling
-        if not engine.game_active and game_over_time == 0:
-            # Game just ended, record the time
-            game_over_time = time.time()
         
-        # If game over time is recorded, check for the delay
-        if game_over_time != 0 and (time.time() - game_over_time) > 3:
-            running = False # End the main loop after 3 seconds
-
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -55,3 +62,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
